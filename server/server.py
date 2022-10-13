@@ -48,7 +48,7 @@ class Server:
             body = ''
             if body_start >= 0:
                 body = request[body_start+4:]
-            print(f'Request: {method} {path} {body}')
+            print('Request: {method} {path} {body}'.format(method=method, path=path, body=body))
             try:
                 funct = self.urls.get(method).get(path)
                 if funct is not None:
