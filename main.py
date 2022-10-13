@@ -1,4 +1,5 @@
 from server import Server
+from server import JsonResponse200
 import ujson
 from boards import Sensors
 from pycoproc_1 import Pycoproc # Para pysensev1
@@ -13,8 +14,11 @@ py = Pycoproc(Pycoproc.PYSENSE) #Para pysensev1
 pySensor = Sensors(py)
 server = Server()
 
-# @server.get('/temperature')
+
+@server.get('/temperature')
 def get_temperature(json: str):
-    return ujson.dumps({"value" : pySensor.get_data("temperature")})
+    return str(JsonResponse200(ujson.dumps({"value": pySensor.get_data("temperature")})))
 
 print(type(get_temperature("temperature").encode()))
+
+
