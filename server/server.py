@@ -1,9 +1,18 @@
+import pwd
 import usocket
 from network import WLAN
 import _thread
 
-class WlanServer():
-    def __init__(self, ext_ant:bool=True, api:RestApi=None, port=8000):
+from api import RestApi
+class Network:
+    def __init__(self, ssid:str, pwd:str, config:tuple):
+        self.ssid = ssid
+        self.pwd = pwd
+        self.config = config
+
+
+class WlanServer:
+    def __init__(self, ext_ant:bool=True, api:RestApi=None, port:int=8000):
         self.wlan = WLAN(mode=WLAN.STA)
         if ext_ant:
             self.wlan.antenna(WLAN.EXT_ANT)
@@ -13,6 +22,15 @@ class WlanServer():
             self.api = api
 
         self.port = port
+
+    """
+    nets: shoud be a list of Networks
+    ToDo
+    """
+    def connect(self, nets:list=None):
+        print("Scanning for known wifi nets")
+        available_nets = self.wlan.scan()
+        known_available_nets = []
 
     def on_connect_success(self):
         # Set up server socket
