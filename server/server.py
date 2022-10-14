@@ -1,63 +1,33 @@
+import usocket
+from network import WLAN
+import _thread
 
+class WlanServer():
+    def __init__(self, ext_ant:bool=True, api:RestApi=None, port=8000):
+        self.wlan = WLAN(mode=WLAN.STA)
+        if ext_ant:
+            self.wlan.antenna(WLAN.EXT_ANT)
+        if api is None:
+            raise Exception("API not specified. Need an API to start server!")
+        else:
+            self.api = api
 
-class Server:
-    urls = {
-        'GET': dict(),
-        'POST': dict(),
-        'PUT': dict(),
-        'DELETE': dict(),
-        'PATCH': dict()
-    }
+        self.port = port
 
-    def get(self, path: str):
-        def decorator_repeat(func):
-            self.urls['GET'][path] = func
-        return decorator_repeat
+    def on_connect_success(self):
+        # Set up server socket
+        serversocket = usocket.socket(usocket.AF_INET, usocket.SOCK_STREAM)
+        serversocket.setsockopt(usocket.SOL_SOCKET, usocket.SO_REUSEADDR, 1)
+        serversocket.bind((self.wlan.ifconfig()[0], self.port))
 
-    def post(self, path: str):
-        def decorator_repeat(func):
-            self.urls['POST'][path] = func
-        return decorator_repeat
+        # Accept maximum of 40 connections at the same time
+        serversocket.listen(40)
 
-    def put(self, path: str):
-        def decorator_repeat(func):
-            self.urls['PUT'][path] = func
-        return decorator_repeat
-
-    def delete(self, path: str):
-        def decorator_repeat(func):
-            self.urls['DELETE'][path] = func
-        return decorator_repeat
-
-    def patch(self, path: str):
-        def decorator_repeat(func):
-            self.urls['PATCH'][path] = func
-        return decorator_repeat
-
-    def get_client_thread(self):
-        def client_thread(socket, n):
-            # request = socket.recv(4096)
-            request = socket.recv(4096).decode()
-            if len(request) == 0:
-                socket.close()
-                # return BadRequest
-                return
-            method = request.split(' ')[0]
-            path = request.split(' ')[1]
-            body_start = request.find('\r\n\r\n')
-            body = ''
-            if body_start >= 0:
-                body = request[body_start+4:]
-            print('Request: {method} {path} {body}'.format(method=method, path=path, body=body))
-            try:
-                funct = self.urls.get(method).get(path)
-                if funct is not None:
-                    # Build response and send to client
-                    response = funct(body)
-                    socket.send(response.encode())
-                    socket.close()
-
-            except Exception as err:
-                # return BadRequest
-                pass
-        return client_thread
+        # Unique data to send back
+        c = 1
+        while True:
+            # Accept the connection of the clients
+            (clientsocket, address) = serversocket.accept()
+            # Start a new thread to handle the client
+            _thread.start_new_thread(self.api.get_client_thread(), (clientsocket, c))
+            c = c+1

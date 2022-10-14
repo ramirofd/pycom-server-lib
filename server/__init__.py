@@ -1,2 +1,2 @@
-from .server import Server
+from .api import REST, RestApi
 from .responses import *
