@@ -1,14 +1,25 @@
-import pwd
 import usocket
 from network import WLAN
 import _thread
 
-from api import RestApi
+from .api import RestApi
+
+
 class Network:
-    def __init__(self, ssid:str, pwd:str, config:tuple):
+    def __init__(self, ssid:str, pwd:str=None, config:tuple=None):
         self.ssid = ssid
         self.pwd = pwd
         self.config = config
+
+    def as_dict(self):
+        return {
+            self.ssid: {
+                'pwd': self.pwd,
+                'wlan_config': self.config
+            }
+        }
+    
+    
 
 
 class WlanServer:
@@ -28,9 +39,17 @@ class WlanServer:
     ToDo
     """
     def connect(self, nets:list=None):
+        known_nets = dict()
+        for net in nets:
+            known_nets.update(net.as_dict())
         print("Scanning for known wifi nets")
         available_nets = self.wlan.scan()
-        known_available_nets = []
+        available_nets_names = frozenset([e.ssid for e in available_nets])
+        known_nets_names = frozenset([key for key in known_nets])
+
+        net_to_use = list(available_nets_names & known_nets_names)
+        print('to use:', net_to_use)
+
 
     def on_connect_success(self):
         # Set up server socket
