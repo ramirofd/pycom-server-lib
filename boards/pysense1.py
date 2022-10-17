@@ -8,8 +8,6 @@ from lib.LIS2HH12 import LIS2HH12
 from lib.LTR329ALS01 import LTR329ALS01
 from lib.MPL3115A2 import MPL3115A2, ALTITUDE, PRESSURE
 
-from lib.pycoproc_1 import Pycoproc #Para pysensev1
-
 
 class PySense(RestApi):
 
