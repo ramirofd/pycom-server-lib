@@ -1,8 +1,10 @@
 import sys
+import ujson
 
 from server.responses import Response404
 from server.responses import Response400
 from server.responses import Response500
+from server.responses import JsonResponse200
 
 class RestApi:
     def __init__(self):
@@ -21,9 +23,22 @@ class REST:
         'PATCH': dict()
     }
 
-    def get(self, path: str):
+    def __init__(self):
+        endpoint = {
+            'function': self.__help,
+            'description': 'Shows all available endpoints for this API.',
+            'arguments':dict()
+        }
+        self.urls['GET']['/help'] = endpoint
+
+    def get(self, path: str, description:str, arguments=dict()):
         def decorator_repeat(func):
-            self.urls['GET'][path] = func
+            endpoint = {
+                'function': func,
+                'description': description,
+                'arguments':arguments
+            }
+            self.urls['GET'][path] = endpoint
         return decorator_repeat
 
     def post(self, path: str):
@@ -45,6 +60,14 @@ class REST:
         def decorator_repeat(func):
             self.urls['PATCH'][path] = func
         return decorator_repeat
+
+    def __help(self, json:str):
+        urls_copy = self.urls.copy()
+        for value in urls_copy.values():
+            for vvalue in value.values():
+                vvalue.pop('function')
+        resp = str(JsonResponse200(ujson.dumps(urls_copy)))
+        return resp
 
     def get_client_thread(self):
         def client_thread(socket, n):
@@ -68,7 +91,7 @@ class REST:
                 funct = self.urls.get(method).get(path)
                 if funct is not None:
                     # Build response and send to client
-                    response = funct(body)
+                    response = funct.get('function')(body)
                     socket.send(response.encode())
                     socket.close()
                 else:

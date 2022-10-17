@@ -36,31 +36,31 @@ class PySense(RestApi):
 py_sense_api = PySense()
 
 
-@py_sense_api.rest.get('/light')
+@py_sense_api.rest.get('/light', 'Returns light value')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("light")})))
     return resp
 
 
-@py_sense_api.rest.get('/humidity')
+@py_sense_api.rest.get('/humidity', 'Returns humidity value')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("humidity")})))
     return resp
 
 
-@py_sense_api.rest.get('/temperature')
+@py_sense_api.rest.get('/temperature', 'Returns temperature value')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("temperature")})))
     return resp
 
 
-@py_sense_api.rest.get('/pressure')
+@py_sense_api.rest.get('/pressure', 'Returns pressure value')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("pressure")})))
     return resp
 
 
-@py_sense_api.rest.get('/acceleration')
+@py_sense_api.rest.get('/acceleration', 'Returns acceleration value')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("acceleration")})))
     return resp
