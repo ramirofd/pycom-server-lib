@@ -1,6 +1,7 @@
 import usocket
 import machine
 from network import WLAN
+from network import MDNS
 import _thread
 
 from .api import RestApi
@@ -22,7 +23,9 @@ class Network:
     
 
 class WlanServer:
-    def __init__(self, ext_ant:bool=True, api:RestApi=None, port:int=8000, ap_mode_ssid:str='Pycom-Node', ap_mode_auth:tuple=None, ap_mode_channel:int=6):
+    def __init__(self, ext_ant:bool=True, api:RestApi=None, port:int=8000, 
+                ap_mode_ssid:str='Pycom-Node', ap_mode_auth:tuple=None, 
+                ap_mode_channel:int=6, service_name:str='pycom_edu_api'):
         self.wlan = WLAN(mode=WLAN.STA)
 
         if ext_ant:
@@ -41,6 +44,8 @@ class WlanServer:
         self.ap_mode_ssid = ap_mode_ssid
         self.ap_mode_auth = ap_mode_auth
         self.ap_mode_channel = ap_mode_channel
+
+        self.service_name = service_name
 
     """
     nets: shoud be a list of Networks
@@ -100,10 +105,14 @@ class WlanServer:
 
         # Accept maximum of 40 connections at the same time
         serversocket.listen(40)
+        print('Server started on: {ip}:{port}'.format(ip=self.wlan.ifconfig()[0], port=self.port))
 
+        # Start MDNS 
+        MDNS.init()
+        MDNS.set_name(hostname = self.ap_mode_ssid)
+        MDNS.add_service("_{service}".format(service=self.service_name), MDNS.PROTO_TCP, 8000)
         # Unique data to send back
         c = 1
-        print('Server started on: {ip}:{port}'.format(ip=self.wlan.ifconfig()[0], port=self.port))
         while True:
             # Accept the connection of the clients
             (clientsocket, address) = serversocket.accept()
