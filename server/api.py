@@ -62,10 +62,19 @@ class REST:
         return decorator_repeat
 
     def __help(self, json:str):
-        urls_copy = self.urls.copy()
-        for value in urls_copy.values():
-            for vvalue in value.values():
-                vvalue.pop('function')
+        urls_copy = {
+            'GET': dict(),
+            'POST': dict(),
+            'PUT': dict(),
+            'DELETE': dict(),
+            'PATCH': dict()
+        }
+        for method in self.urls.keys():
+            for path in self.urls[method].keys():
+                urls_copy[method][path] = {
+                    'description': self.urls.get(method).get(path).get('description'),
+                    'arguments': self.urls.get(method).get(path).get('arguments')
+                }
         resp = str(JsonResponse200(ujson.dumps(urls_copy)))
         return resp
 
