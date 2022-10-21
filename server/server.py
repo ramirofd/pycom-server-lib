@@ -59,14 +59,10 @@ class WlanServer:
         available_nets = self.wlan.scan()
         available_nets_names = frozenset([e.ssid for e in available_nets])
         known_nets_names = frozenset([key for key in known_nets])
-        print('available', available_nets_names)
-        print('known', known_nets_names)
         net_to_use = list(available_nets_names & known_nets_names)
-        print('to use', net_to_use)
         net_index = 0
         connected = False
         while not connected and net_index<len(net_to_use):
-            print('index', net_index, 'length net_to_use',len(net_to_use))
             current_network = net_to_use[net_index]
             try:
                 print('Trying to connect to: {network}'.format(network=current_network))

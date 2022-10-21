@@ -41,9 +41,14 @@ class REST:
             self.urls['GET'][path] = endpoint
         return decorator_repeat
 
-    def post(self, path: str):
+    def post(self, path: str, description:str, arguments=dict()):
         def decorator_repeat(func):
-            self.urls['POST'][path] = func
+            endpoint = {
+                'function': func,
+                'description': description,
+                'arguments':arguments
+            }
+            self.urls['POST'][path] = endpoint
         return decorator_repeat
 
     def put(self, path: str):
@@ -88,7 +93,6 @@ class REST:
                 socket.send(response.encode())
                 socket.close()
                 return
-                
             method = request.split(' ')[0]
             path = request.split(' ')[1]
             body_start = request.find('\r\n\r\n')

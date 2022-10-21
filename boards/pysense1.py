@@ -1,12 +1,13 @@
 import ujson
+import pycom
 
 from server import REST
 from server import RestApi
 from server import JsonResponse200
-from lib.SI7006A20 import SI7006A20
-from lib.LIS2HH12 import LIS2HH12
-from lib.LTR329ALS01 import LTR329ALS01
-from lib.MPL3115A2 import MPL3115A2, ALTITUDE, PRESSURE
+from SI7006A20 import SI7006A20
+from LIS2HH12 import LIS2HH12
+from LTR329ALS01 import LTR329ALS01
+from MPL3115A2 import MPL3115A2, ALTITUDE, PRESSURE
 
 
 class PySense(RestApi):
@@ -63,4 +64,11 @@ def get_temperature(json: str):
 @py_sense_api.rest.get('/acceleration', 'Returns acceleration value')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("acceleration")})))
+    return resp
+
+@py_sense_api.rest.post('/color', 'Change color led on the board', {'color': 'int - hexadecimal value of the RGB color'})
+def post_change_color(json: str):
+    d = ujson.loads(json)["color"]
+    pycom.rgbled(int(hex(d)))
+    resp = str(JsonResponse200(ujson.dumps({"value": "OK"})))
     return resp
