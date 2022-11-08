@@ -6,7 +6,6 @@ import _thread
 
 from .api import RestApi
 
-
 class Network:
     def __init__(self, ssid:str, pwd:str=None, config:tuple=None):
         self.ssid = ssid
