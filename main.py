@@ -25,7 +25,4 @@ nets = [
     Network(ssid='FCEFyN')
 ]
 
-while True:
-    py_scan_api.get_card_id(py_scan_api.lector,py_scan_api.counter)
-    # server.connect(nets=nets)
-
+server.connect(nets=nets)
