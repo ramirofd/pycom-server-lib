@@ -12,6 +12,13 @@ from MFRC630 import MFRC630
 
 NO_COLOUR = 0x000000
 
+ID = 0
+ID1 = []
+CARDkey = [ 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF ]
+DECODE_CARD = False
+
+counter = 0
+
 class PyScan(RestApi):
 
     def __init__(self):
@@ -19,6 +26,7 @@ class PyScan(RestApi):
         self.sensors = None
         self.lector = None
         self.counter = 0
+        self.py = None
     
     def get_data(self, sensor):
         if self.sensors is None:
@@ -32,23 +40,31 @@ class PyScan(RestApi):
             "light": LTR329ALS01(pycoproc),
             "acceleration": LIS2HH12(pycoproc)
         }
-        self.lector = MFRC630(pycoproc)
+        self.py = pycoproc
 
-    def get_card_id(self,lector,counter):
-        lector.mfrc630_cmd_init()
-        atqa = lector.mfrc630_iso14443a_WUPA_REQA(lector.MFRC630_ISO14443_CMD_REQA)
-        if(atqa!= 0):
-            print("A card has been detected, reading its UID ...")
-            uid = bytearray(10)
-            uid_len= lector.mfrc630_iso14443a_select(uid)
-            print('\tUID has length: {}'.format(uid_len))
-            if(uid_len > 0):
-                counter += 1
-                print("\tUID [{}]: {}".format(uid_len, lector.format_block(uid, uid_len)))
-
-        lector.mfrc630_cmd_reset()
-        time.sleep(.5)
-        lector.mfrc630_cmd_init()
+    def read(self):
+        global ID, counter
+        nfc = MFRC630(self.py)
+        nfc.mfrc630_cmd_init()
+        while(True):
+            atqa = nfc.mfrc630_iso14443a_WUPA_REQA(nfc.MFRC630_ISO14443_CMD_REQA)
+            if (atqa != 0):
+                uid = bytearray(10)
+                uid_len = nfc.mfrc630_iso14443a_select(uid)
+                if (uid_len > 0):
+                    counter += 1
+                    ID = nfc.format_block(uid, uid_len)
+                    print(ID)
+                    if(len(ID1) == 10):
+                        ID1.pop(0)
+                    ID1.append(ID)
+                    break
+        return ID
+    
+    def reader(self):
+        if(len(ID1) == 10):
+            print("Hola")
+        return ID1
 
 py_scan_api = PyScan()
 
@@ -62,6 +78,16 @@ def get_acceleration(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_scan_api.get_data("acceleration")})))
     return resp
 
+@py_scan_api.rest.get('/id', 'Return ID card read')
+def card_id(json: str):
+    resp = str(JsonResponse200(ujson.dumps({"value": py_scan_api.read()})))
+    return resp
+
+@py_scan_api.rest.get('/lastid', 'Return the last ID card read')
+def card_id(json: str):
+    resp = str(JsonResponse200(ujson.dumps({"value": py_scan_api.reader()})))
+    return resp
+
 @py_scan_api.rest.post('/color', 'Change color led on the board', {'color': 'str - hexadecimal value of the RGB color'})
 def post_change_color(json: str):
     d = ujson.loads(json)["color"]
@@ -70,7 +96,3 @@ def post_change_color(json: str):
     pycom.rgbled(NO_COLOUR)
     resp = str(JsonResponse200(ujson.dumps({"value": "OK"})))
     return resp
-
-def card_id():
-    print("Holaaaaa")
-    return py_scan_api.get_card_id(py_scan_api.lector)
