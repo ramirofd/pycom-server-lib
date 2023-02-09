@@ -94,7 +94,7 @@ def post_change_color(json: str):
         return resp
     pycom.rgbled(int((color)))
     if duration is not None:
-        time.sleep(5)
+        time.sleep(duration)
         pycom.rgbled(NO_COLOUR)
     resp = str(JsonResponse200(ujson.dumps({"value": "OK"})))
     return resp
