@@ -7,7 +7,6 @@ from network import MDNS
 
 from .api import RestApi
 
-
 class Network:
     def __init__(self, ssid:str, pwd:str=None, config:tuple=None):
         self.ssid = ssid
@@ -60,7 +59,6 @@ class WlanServer:
         available_nets = self.wlan.scan()
         available_nets_names = frozenset([e.ssid for e in available_nets])
         known_nets_names = frozenset([key for key in known_nets])
-
         net_to_use = list(available_nets_names & known_nets_names)
         net_index = 0
         connected = False
@@ -85,7 +83,7 @@ class WlanServer:
                 print('Success connecting to: {network}'.format(network=current_network))
                 connected = True
 
-            except TimeoutError as err:
+            except Exception as err:
                 print('Failed connecting to: {network}'.format(network=current_network))
                 net_index += 1 
                 print('Trying the next available network')
@@ -94,8 +92,9 @@ class WlanServer:
             self.on_connect_success()
         else:
             print("Failed to connect to any known network, going into AP mode")
-            antenna = WLAN.EXT_ANT if self.ext_ant else WLAN.INT_ANT
             self.wlan.init(mode=WLAN.AP, ssid=self.ap_mode_ssid, auth=self.ap_mode_auth, channel=self.ap_mode_channel, antenna=self.ap_mode_antenna)
+            self.on_connect_success()
+
 
 
     def on_connect_success(self):

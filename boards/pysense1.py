@@ -1,13 +1,17 @@
+from time import time
 import ujson
+import pycom
+import time
 
 from server import REST
 from server import RestApi
 from server import JsonResponse200
-from lib.SI7006A20 import SI7006A20
-from lib.LIS2HH12 import LIS2HH12
-from lib.LTR329ALS01 import LTR329ALS01
-from lib.MPL3115A2 import MPL3115A2, ALTITUDE, PRESSURE
+from SI7006A20 import SI7006A20
+from LIS2HH12 import LIS2HH12
+from LTR329ALS01 import LTR329ALS01
+from MPL3115A2 import MPL3115A2, PRESSURE
 
+NO_COLOUR = 0x000000
 
 class PySense(RestApi):
 
@@ -37,41 +41,30 @@ class PySense(RestApi):
             "pitch": accelero
         }
 
-
 py_sense_api = PySense()
-
 
 @py_sense_api.rest.get('/light', 'Returns light value of the light sensor')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("light")})))
     return resp
 
-
 @py_sense_api.rest.get('/humidity', 'Returns humidity value')
-def get_temperature(json: str):
+def get_humidity(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("humidity")})))
     return resp
-
 
 @py_sense_api.rest.get('/temperature', 'Returns temperature value')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("temperature")})))
     return resp
 
-
 @py_sense_api.rest.get('/pressure', 'Returns pressure value')
-def get_temperature(json: str):
+def get_pressure(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("pressure")})))
     return resp
 
-
 @py_sense_api.rest.get('/acceleration', 'Returns acceleration value')
-def get_temperature(json: str):
-    resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("acceleration")})))
-    return resp
-
-@py_sense_api.rest.post('/led_color', 'Changes the color of the LED', {'color':'int - The hexadecimal value of the color to be set.'})
-def post_led_color(json: str):
+def get_acceleration(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("acceleration")})))
     return resp
 
@@ -88,4 +81,20 @@ def get_temperature(json: str):
 @py_sense_api.rest.get('/pitch', 'Returns the pitchj value of the accelerometer')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("pitch")})))
+
+@py_sense_api.rest.post('/color', 'Change color led on the board', {
+    'color': 'str - hexadecimal value of the RGB color',
+    'duration': 'int - duration in seconds to keep led on before turning it off'
+})
+def post_change_color(json: str):
+    color = ujson.loads(json).get("color", None)
+    duration = ujson.loads(json).get("duration", None) 
+    if color is None:
+        resp = str(JsonResponse400(ujson.dumps({"value": "Failed because you forgot to send the color code"})))
+        return resp
+    pycom.rgbled(int((color)))
+    if duration is not None:
+        time.sleep(5)
+        pycom.rgbled(NO_COLOUR)
+    resp = str(JsonResponse200(ujson.dumps({"value": "OK"})))
     return resp

@@ -118,7 +118,6 @@ class REST:
                 socket.send(response.encode())
                 socket.close()
                 return
-                
             method = request.split(' ')[0]
             path = request.split(' ')[1]
             body_start = request.find('\r\n\r\n')
