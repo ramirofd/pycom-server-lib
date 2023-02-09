@@ -24,19 +24,24 @@ class PySense(RestApi):
         return a()
 
     def set_pycoproc(self, pycoproc):
+        light_lux = LTR329ALS01(pycoproc)
+        accelero = LIS2HH12(pycoproc)
         self.sensors = {
-            "light": LTR329ALS01(pycoproc),
+            "light": light_lux,
+            "lux": light_lux,
             "humidity": SI7006A20(pycoproc),
             "temperature": SI7006A20(pycoproc),
             "pressure": MPL3115A2(pycoproc, mode=PRESSURE),
-            "acceleration": LIS2HH12(pycoproc)
+            "acceleration": accelero,
+            "roll": accelero,
+            "pitch": accelero
         }
 
 
 py_sense_api = PySense()
 
 
-@py_sense_api.rest.get('/light', 'Returns light value')
+@py_sense_api.rest.get('/light', 'Returns light value of the light sensor')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("light")})))
     return resp
@@ -63,4 +68,24 @@ def get_temperature(json: str):
 @py_sense_api.rest.get('/acceleration', 'Returns acceleration value')
 def get_temperature(json: str):
     resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("acceleration")})))
+    return resp
+
+@py_sense_api.rest.post('/led_color', 'Changes the color of the LED', {'color':'int - The hexadecimal value of the color to be set.'})
+def post_led_color(json: str):
+    resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("acceleration")})))
+    return resp
+
+@py_sense_api.rest.get('/lux', 'Returns the illuminance value of the light sensor')
+def get_temperature(json: str):
+    resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("lux")})))
+    return resp
+
+@py_sense_api.rest.get('/roll', 'Returns the roll value of the accelerometer')
+def get_temperature(json: str):
+    resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("roll")})))
+    return resp
+
+@py_sense_api.rest.get('/pitch', 'Returns the pitchj value of the accelerometer')
+def get_temperature(json: str):
+    resp = str(JsonResponse200(ujson.dumps({"value": py_sense_api.get_data("pitch")})))
     return resp

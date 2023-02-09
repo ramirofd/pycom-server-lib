@@ -30,7 +30,15 @@ class REST:
             'arguments':dict()
         }
         self.urls['GET']['/help'] = endpoint
+    """
+    Example:
 
+    arguments = {
+        '<name>': '<type> - <description>',
+        '<name>': '<type> - <description>',
+        '<name>': '<type> - <description>',
+    }
+    """
     def get(self, path: str, description:str, arguments=dict()):
         def decorator_repeat(func):
             endpoint = {
@@ -41,24 +49,44 @@ class REST:
             self.urls['GET'][path] = endpoint
         return decorator_repeat
 
-    def post(self, path: str):
+    def post(self, path: str, description:str, arguments=dict()):
         def decorator_repeat(func):
-            self.urls['POST'][path] = func
+            endpoint = {
+                'function': func,
+                'description': description,
+                'arguments':arguments
+            }
+            self.urls['POST'][path] = endpoint
         return decorator_repeat
 
-    def put(self, path: str):
+    def put(self, path: str, description:str, arguments=dict()):
         def decorator_repeat(func):
-            self.urls['PUT'][path] = func
+            endpoint = {
+                'function': func,
+                'description': description,
+                'arguments':arguments
+            }
+            self.urls['PUT'][path] = endpoint
         return decorator_repeat
 
-    def delete(self, path: str):
+    def delete(self, path: str, description:str, arguments=dict()):
         def decorator_repeat(func):
-            self.urls['DELETE'][path] = func
+            endpoint = {
+                'function': func,
+                'description': description,
+                'arguments':arguments
+            }
+            self.urls['DELETE'][path] = endpoint
         return decorator_repeat
 
-    def patch(self, path: str):
+    def patch(self, path: str, description:str, arguments=dict()):
         def decorator_repeat(func):
-            self.urls['PATCH'][path] = func
+            endpoint = {
+                'function': func,
+                'description': description,
+                'arguments':arguments
+            }
+            self.urls['PATCH'][path] = endpoint
         return decorator_repeat
 
     def __help(self, json:str):
@@ -77,6 +105,8 @@ class REST:
                 }
         resp = str(JsonResponse200(ujson.dumps(urls_copy)))
         return resp
+
+    
 
     def get_client_thread(self):
         def client_thread(socket, n):

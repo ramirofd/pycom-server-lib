@@ -1,8 +1,9 @@
 import usocket
 import machine
+import _thread
+
 from network import WLAN
 from network import MDNS
-import _thread
 
 from .api import RestApi
 
